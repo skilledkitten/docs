@@ -1,190 +1,231 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "Discord User API",
+    "version": "1.0.0",
+    "description": "API documentation for Discord's User endpoints."
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "https://discord.com/api/v10",
+      "description": "Discord API Base URL"
     }
   ],
   "paths": {
-    "/plants": {
+    "/users/@me": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "summary": "Get Current User",
+        "description": "Retrieve information about the current user.",
+        "tags": ["User"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string", "description": "Unique user ID."},
+                    "username": {"type": "string", "description": "The user's display name."},
+                    "discriminator": {"type": "string", "description": "The user's 4-digit Discord tag."},
+                    "avatar": {"type": "string", "nullable": true, "description": "Hash of the user's avatar."},
+                    "verified": {"type": "boolean", "description": "Whether the user's email is verified."},
+                    "email": {"type": "string", "nullable": true, "description": "The user's email address."},
+                    "flags": {"type": "integer", "description": "User flags."},
+                    "premium_type": {"type": "integer", "nullable": true, "description": "Type of Nitro subscription."},
+                    "public_flags": {"type": "integer", "description": "Public user flags."}
+                  },
+                  "example": {
+                    "id": "123456789012345678",
+                    "username": "ExampleUser",
+                    "discriminator": "1234",
+                    "avatar": "avatar_hash",
+                    "verified": true,
+                    "email": "user@example.com",
+                    "flags": 64,
+                    "premium_type": 2,
+                    "public_flags": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{user.id}": {
+      "get": {
+        "summary": "Get User",
+        "description": "Fetch a user object for a specified user ID.",
+        "tags": ["User"],
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+            "name": "user.id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "The user's unique ID."
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "User information retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string", "description": "Unique user ID."},
+                    "username": {"type": "string", "description": "The user's display name."},
+                    "discriminator": {"type": "string", "description": "The user's 4-digit Discord tag."},
+                    "avatar": {"type": "string", "nullable": true, "description": "Hash of the user's avatar."}
+                  },
+                  "example": {
+                    "id": "123456789012345678",
+                    "username": "ExampleUser",
+                    "discriminator": "1234",
+                    "avatar": "avatar_hash"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/@me": {
+      "patch": {
+        "summary": "Modify Current User",
+        "description": "Modify the current user's account settings.",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string", "description": "The new username."},
+                  "avatar": {"type": "string", "nullable": true, "description": "Base64 encoded avatar image."}
+                },
+                "example": {
+                  "username": "NewUsername",
+                  "avatar": "data:image/png;base64,<BASE64_IMAGE_DATA>"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User information updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string", "description": "Unique user ID."},
+                    "username": {"type": "string", "description": "The user's display name."},
+                    "discriminator": {"type": "string", "description": "The user's 4-digit Discord tag."},
+                    "avatar": {"type": "string", "nullable": true, "description": "Hash of the user's avatar."}
+                  },
+                  "example": {
+                    "id": "123456789012345678",
+                    "username": "NewUsername",
+                    "discriminator": "1234",
+                    "avatar": "new_avatar_hash"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/@me/guilds": {
+      "get": {
+        "summary": "Get Current User Guilds",
+        "description": "Retrieve a list of guilds the current user is a member of.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Get guilds before this ID."
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "string"},
+            "description": "Get guilds after this ID."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "integer", "default": 100, "maximum": 200},
+            "description": "Number of guilds to return (default: 100, max: 200)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of guilds retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Plant"
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string", "description": "Guild ID."},
+                      "name": {"type": "string", "description": "Guild name."},
+                      "icon": {"type": "string", "nullable": true, "description": "Guild icon hash."},
+                      "owner": {"type": "boolean", "description": "Whether the user owns the guild."},
+                      "permissions": {"type": "string", "description": "User permissions in the guild."},
+                      "features": {"type": "array", "items": {"type": "string"}, "description": "List of guild features."}
+                    },
+                    "example": {
+                      "id": "123456789012345678",
+                      "name": "GuildName",
+                      "icon": "icon_hash",
+                      "owner": true,
+                      "permissions": "2147483647",
+                      "features": ["INVITE_SPLASH"]
+                    }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
           }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
         },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
+        "security": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "bearerAuth": []
           }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
+        ]
       }
     }
   },
   "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
